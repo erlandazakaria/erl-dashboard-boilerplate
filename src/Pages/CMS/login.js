@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useLazyQuery } from "@apollo/client";
 import { makeStyles } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
 import Grid from "@material-ui/core/Grid";
@@ -9,7 +8,6 @@ import { useAuth } from "../../Contexts/Auth";
 import { useToast } from "../../Contexts/Toast";
 
 import Logo from "../../Assets/logo-dark.png";
-import { LOGIN } from "../../Queries/User";
 
 const Login = () => {
   const classes = useStyles();
@@ -19,22 +17,6 @@ const Login = () => {
   const [ isUsernameErr, setUsernameErr ] = useState(false);
   const [ password, setPassword ] = useState("");
   const [ isPasswordErr, setPasswordErr ] = useState(false);
-  const [ reqLogin ] = useLazyQuery(LOGIN, {
-    onCompleted: (val) => {
-      if(val.login.__typename === 'Message') {
-        if(val.login.message.includes('Email')) {
-          setUsernameErr(true);
-        } else if(val.login.message.includes('Password')) {
-          setPasswordErr(true);
-        } else {
-          setUsernameErr(true); setPasswordErr(true);
-        }
-      } else {
-        openToast("Successfully Login");
-        login(val.login)
-      }
-    }
-  });
 
   const onChange = (val, key) => {
     setUsernameErr(false);
@@ -46,8 +28,22 @@ const Login = () => {
     }
   };
 
-  const onLogin = () => {
-    reqLogin({variables: {email: username, password}});
+  const onLogin = async () => {
+    const res = await login({email: username, password});
+    switch(res) {
+      case "email":
+        setUsernameErr(true);
+        break;
+      case "password":
+        setPasswordErr(true);
+        break;
+      case "both":
+        setUsernameErr(true); setPasswordErr(true);
+        break;
+      default:
+        openToast("Successfully Login");
+        break;
+    }
   };
 
   return (

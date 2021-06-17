@@ -1,22 +1,24 @@
 import { createContext, useReducer, useMemo, useContext} from "react";
 import { readLocalUser, writeLocalUser, deleteLocalUser } from "../Utils/localStorage";
+import { gqlClient } from "../config";
+import { LOGIN } from "../Queries/User";
 
 const AuthContext = createContext();
 
 const initialAuthState = false;
 
 function AuthReducer(state, action) {
-    switch (action.type) {
-        case "SET_AUTH": {
-            return action.payload;
-        }
-        case "UNSET_AUTH": {
-            return {};
-        }
-        default: {
-            throw new Error(`Unhandled type: ${action.type}`);
-        }
-    }
+  switch (action.type) {
+      case "SET_AUTH": {
+          return action.payload;
+      }
+      case "UNSET_AUTH": {
+          return {};
+      }
+      default: {
+          throw new Error(`Unhandled type: ${action.type}`);
+      }
+  }
 }
 
 export function AuthProvider(props) {
@@ -41,10 +43,24 @@ export function useAuth() {
       return false;
     }
   };
-  const login = (payload) => {
-    if(state !== payload) {
-      writeLocalUser(payload);
-      dispatch({ type: "SET_AUTH", payload });
+  const login = async (payload) => {
+    const { data } = await gqlClient.mutate({
+      mutation: LOGIN,
+      variables: payload
+    });
+    if(data.login.__typename === 'Message') {
+      if(data.login.message.includes('Email')) {
+        return("email");
+      } else if(data.login.message.includes('Password')) {
+        return("password");
+      } else {
+        return("both")
+      }
+    } else {
+      if(state !== data.login) {
+        writeLocalUser(data.login);
+        dispatch({ type: "SET_AUTH", payload: data.login });
+      }
     }
   };
   const logout = () => {
