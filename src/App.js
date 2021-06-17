@@ -1,24 +1,43 @@
-import logo from './logo.svg';
-import './App.css';
+import { Switch, Route, Redirect } from "react-router-dom";
+import { ApolloProvider } from '@apollo/client';
+import { gqlClient } from './config';
+import { AuthProvider } from './Contexts/Auth';
+import { ToastProvider } from './Contexts/Toast';
 
-function App() {
+import Home from './Pages/Home';
+import About from './Pages/About';
+import Contact from './Pages/Contact';
+import CMS from './Pages/CMS';
+import NotFound from "./Pages/NotFound";
+
+const App = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Switch>
+      <Route exact path="/">
+        <Home />
+      </Route>
+      <Route path="/about">
+        <About />
+      </Route>
+      <Route path="/contact">
+        <Contact />
+      </Route>
+      <Route path="/cms">
+        <ApolloProvider client={gqlClient}>
+          <AuthProvider>
+            <ToastProvider>
+              <CMS />
+            </ToastProvider>
+          </AuthProvider>
+        </ApolloProvider>
+      </Route>
+      <Route path="/not-found">
+        <NotFound />
+      </Route>
+      <Route path="*">
+        <Redirect to="/not-found" />
+      </Route>
+    </Switch>
   );
 }
 
