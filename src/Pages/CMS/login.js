@@ -51,14 +51,15 @@ const Login = () => {
       <Grid container direction="column" justify="center" alignItems="center" className="full-height">
         <img alt="logo" src={Logo} className={classes.logo} />
         <TextField 
-          label="Username" 
+          label="Email" 
           variant="outlined" 
-          placeholder="Username" 
+          placeholder="Email" 
           color="primary" 
           margin="dense"
           value={username}
           error={isUsernameErr}
           onChange={(e) => onChange(e.target.value, "u")}
+          helperText={isUsernameErr && "Email Not Found"}
         />
         <TextField 
           label="Password" 
@@ -76,6 +77,7 @@ const Login = () => {
             }
           }}
           onChange={(e) => onChange(e.target.value, "p")}
+          helperText={isPasswordErr && "Wrong Password"}
         />
         <Button
           variant="contained"
